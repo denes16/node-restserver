@@ -12,7 +12,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // app.use( express.static( __dirname + '/public' ) );
-app.use( require('./routes/usuario') );
+
+
+// Configuración de rutas
+app.use( require('./routes/index') );
 
 
 mongoose.connect(process.env.URL_DB, {

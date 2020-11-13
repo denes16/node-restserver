@@ -8,17 +8,17 @@ const app = express();
 
 const Usuario = require('../models/usuario');
 
+const { validar, validarAdmin } = require('../middlewares/validation');
 
-
-app.get('/usuario', (req, res) => {
+app.get('/usuario', validar, (req, res) => {
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
 
     let limite = req.query.limite || 5;
     limite = Number(limite);
-    let filtro = {estado:true};
-    Usuario.find(filtro , 'nombre email role estado google')
+    let filtro = { estado: true };
+    Usuario.find(filtro, 'nombre email role estado google')
         .skip(desde)
         .limit(limite)
         .exec((err, usuarios) => {
@@ -42,7 +42,7 @@ app.get('/usuario', (req, res) => {
 
 
 });
-app.post('/usuario', (req, res) => {
+app.post('/usuario', [validar, validarAdmin], (req, res) => {
 
     let body = req.body;
     let usuario = new Usuario({
@@ -68,12 +68,12 @@ app.post('/usuario', (req, res) => {
         });
     });
 });
-app.put('/usuario/:id', (req, res) => {
+app.put('/usuario/:id', [validar, validarAdmin], (req, res) => {
 
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
-    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
+    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true, context: 'query' }, (err, usuarioDB) => {
         if (err) {
             return res.status(400).json({
                 success: false,
@@ -82,15 +82,13 @@ app.put('/usuario/:id', (req, res) => {
             });
         }
         if (!usuarioDB) {
-            if (err) {
-                return res.status(400).json({
-                    success: false,
-                    err: {
-                        msg: 'Usuario no encontrado'
-                    },
-                    status: 400
-                });
-            }
+            return res.status(400).json({
+                success: false,
+                err: {
+                    msg: 'Usuario no encontrado'
+                },
+                status: 400
+            });
         }
         res.json({
             success: true,
@@ -100,11 +98,11 @@ app.put('/usuario/:id', (req, res) => {
     });
 
 });
-app.delete('/usuario/:id', (req, res) => {
+app.delete('/usuario/:id', [validar, validarAdmin], (req, res) => {
 
     let id = req.params.id;
     let estado = { estado: false };
-    Usuario.findByIdAndUpdate(id,  estado, { new: true }, (err, usuarioDB) => {
+    Usuario.findByIdAndUpdate(id, estado, { new: true }, (err, usuarioDB) => {
         if (err) {
             return res.status(400).json({
                 success: false,
