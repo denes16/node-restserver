@@ -51,6 +51,12 @@ app.put('/upload/:tipo/:id', function (req, res) {
         });
     }
     let nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extension}`;
+    if( ! fs.existsSync( path.resolve(`uploads`) ) ) {
+        crearDirectorio();
+    }
+    if( ! fs.existsSync( path.resolve(`uploads/${ tipo }`) ) ){
+        crearDirectorio( tipo );
+    }
     file.mv(`uploads/${tipo}/${nombreArchivo}`, function (err) {
         if (err) {
             return res.status(500).json({
@@ -168,4 +174,41 @@ const delFile = (file, tipo) => {
         fs.unlinkSync(pathUrl);
     }
 };
+function crearDirectorio( tipo ){
+
+    switch ( tipo ) {
+        case 'usuarios':
+            fs.mkdir(`uploads/${ tipo }`, err => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('Directory Created');
+                }
+            });
+            break;
+
+        case 'productos':
+            fs.mkdir(`uploads/${ tipo }`, err => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('Directory Created');
+                }
+            });
+            break;
+
+        default :
+
+            fs.mkdir('uploads', err => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('Directory Created');
+                }
+            });
+
+            break;
+    }
+
+}
 module.exports = app;
